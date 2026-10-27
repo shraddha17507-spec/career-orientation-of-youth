@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CareerPath</title>
+
+<style>
+/* CareerPath styles: colours and fonts are set once as variables at the top. */
+/* Layout: sticky nav, left-aligned hero with search, then stacked sections that each answer one student question. Teal ink + amber highlight, matching the CEP deck. */
+:root{
+  --bg:#F4F8F8; --surface:#FFFFFF; --ink:#12262B; --muted:#4F656A; --line:#D5E1E2;
+  --brand:#0F4C5C; --brand-ink:#FFFFFF; --tint:#E2F0F0; --accent:#F4A300; --accent-ink:#3A2800;
+  --hero:#0F4C5C; --hero-ink:#FFFFFF; --hero-muted:#BFDADF; --bar:#0F7A8A; --bar-alt:#9DB4B8; --link:#0B5F73;
+  --display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --body:'Source Sans 3','Noto Sans Devanagari','Segoe UI',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0B191D; --surface:#12272C; --ink:#E6F0F1; --muted:#9DB4B8; --line:#25434A;
+  --brand:#5CC3D1; --brand-ink:#06242B; --tint:#173238; --accent:#F4B400; --accent-ink:#2A1D00;
+  --hero:#0E3540; --hero-ink:#FFFFFF; --hero-muted:#A9CBD1; --bar:#4DB3C2; --bar-alt:#5F7A80; --link:#7FD3DF; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B191D; --surface:#12272C; --ink:#E6F0F1; --muted:#9DB4B8; --line:#25434A;
+  --brand:#5CC3D1; --brand-ink:#06242B; --tint:#173238; --accent:#F4B400; --accent-ink:#2A1D00;
+  --hero:#0E3540; --hero-ink:#FFFFFF; --hero-muted:#A9CBD1; --bar:#4DB3C2; --bar-alt:#5F7A80; --link:#7FD3DF; color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 var(--body);padding-inline:16px}
+.wrap{max-width:1080px;margin-inline:auto}
+h1,h2,h3{font-family:var(--display);line-height:1.12;margin:0;text-wrap:balance}
+h2{font-size:clamp(1.7rem,4vw,2.4rem);font-weight:800;letter-spacing:-.01em}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:0}
+a{color:var(--link)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+button{font:inherit;color:inherit;cursor:pointer}
+.sr{position:absolute;left:-9999px}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;margin-inline:-16px;padding-inline:16px;background:var(--bg);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:20px;height:56px}
+.logo{font:800 1.25rem var(--display);color:var(--brand);text-decoration:none;white-space:nowrap}
+.logo b{color:var(--accent)}
+.links{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+.links::-webkit-scrollbar{display:none}
+.links a{white-space:nowrap;text-decoration:none;color:var(--muted);font-weight:600;font-size:.95rem;padding:6px 10px;border-radius:8px}
+.links a:hover{background:var(--tint);color:var(--ink)}
+.theme{border:1px solid var(--line);background:var(--surface);border-radius:8px;width:36px;height:36px;flex:none}
+
+/* hero */
+.hero{margin-inline:-16px;padding:56px 16px 48px;background:var(--hero);color:var(--hero-ink)}
+.hero .wrap{display:grid;grid-template-columns:1.25fr .75fr;gap:40px;align-items:center}
+.mr{font-family:'Noto Sans Devanagari',var(--body);font-weight:700;color:var(--accent);font-size:1.1rem;margin-bottom:10px}
+.hero h1{font-size:clamp(2.3rem,6vw,4rem);font-weight:800;letter-spacing:-.02em}
+.hero p.lead{color:var(--hero-muted);font-size:1.15rem;max-width:34em;margin-top:16px}
+.search{margin-top:26px;display:flex;gap:0;max-width:520px}
+.search input{flex:1;min-width:0;padding:14px 16px;font:inherit;border:2px solid transparent;border-radius:10px 0 0 10px;background:#fff;color:#12262B}
+.search button{padding:0 20px;background:var(--accent);color:var(--accent-ink);border:0;font-weight:700;border-radius:0 10px 10px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chips a{color:var(--hero-ink);text-decoration:none;border:1px solid rgba(255,255,255,.35);padding:5px 12px;border-radius:99px;font-size:.92rem}
+.chips a:hover{background:rgba(255,255,255,.12)}
+.heroside{display:grid;gap:12px}
+.hero .wrap>*,.two>*,.charts>*,.photos>*{min-width:0}
+.stat{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:16px 18px}
+.stat b{display:block;font:800 2.2rem/1 var(--display);color:var(--accent)}
+.stat span{color:var(--hero-muted);font-size:.95rem}
+#results{margin-top:18px;max-width:520px;background:var(--surface);color:var(--ink);border-radius:12px;padding:6px;display:none}
+#results.on{display:block}
+#results button{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 12px;border-radius:8px}
+#results button:hover{background:var(--tint)}
+#results small{display:block;color:var(--muted)}
+#results .none{padding:10px 12px;color:var(--muted)}
+
+/* sections */
+section{padding-block:64px 8px}
+.kicker{font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem;color:var(--brand);margin-bottom:8px}
+.sub{color:var(--muted);max-width:44em;margin-top:10px}
+.head{margin-bottom:26px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.tab{border:1px solid var(--line);background:var(--surface);padding:8px 16px;border-radius:99px;font-weight:600}
+.tab[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(250px,100%),1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;min-width:0}
+.card h3{margin-bottom:6px}
+.card p{color:var(--muted);font-size:.98rem}
+.tag{display:inline-block;font-size:.78rem;font-weight:700;background:var(--tint);color:var(--brand);padding:2px 9px;border-radius:99px;margin:0 6px 6px 0}
+.card dl{margin:12px 0 0;display:grid;gap:8px;font-size:.95rem}
+.card dt{font-weight:700;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--brand)}
+.card dd{margin:0;color:var(--ink)}
+.path .arrow{color:var(--accent);font-weight:800}
+
+/* career explorer */
+.filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.career.hide{display:none}
+.career.pick{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent)}
+
+/* steps */
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(240px,100%),1fr));gap:14px;counter-reset:s}
+.steps li{counter-increment:s;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px 16px 60px;position:relative;min-width:0}
+.steps li::before{content:counter(s);position:absolute;left:16px;top:14px;width:32px;height:32px;border-radius:50%;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;font:800 1rem var(--display)}
+.steps b{display:block}
+.steps span{color:var(--muted);font-size:.95rem}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:22px}
+.check{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px}
+.check label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.check input{margin-top:6px;width:18px;height:18px;accent-color:var(--brand);flex:none}
+.prog{color:var(--muted);font-size:.9rem;margin-top:10px}
+
+/* table */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:.95rem}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--brand);background:var(--tint)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:700;white-space:nowrap}
+.note{color:var(--muted);font-size:.92rem;margin-top:12px}
+
+/* skills */
+.skill .meter{height:8px;border-radius:99px;background:var(--tint);margin:10px 0 4px;overflow:hidden}
+.skill .meter i{display:block;height:100%;background:var(--bar);border-radius:99px}
+.skill ul{margin:10px 0 0;padding-left:20px;color:var(--ink);font-size:.95rem}
+.skill small{color:var(--muted)}
+
+/* charts */
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;min-width:0}
+.chart h3{font-size:1.02rem;margin-bottom:14px}
+.row{display:grid;grid-template-columns:minmax(96px,34%) 1fr 76px;gap:10px;align-items:center;margin:9px 0;font-size:.92rem}
+.row .lab{min-width:0}
+.row .tr{height:16px;background:var(--tint);border-radius:0 5px 5px 0;overflow:hidden}
+.row .tr i{display:block;height:100%;background:var(--bar);border-radius:0 5px 5px 0}
+.row .v{font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.row .v small{font-weight:400;color:var(--muted)}
+.split{display:flex;gap:2px;height:44px;margin:6px 0 10px}
+.split div{display:flex;align-items:center;padding-inline:12px;font-weight:700;color:#fff;min-width:0;white-space:nowrap}
+.split .y{background:var(--bar);border-radius:8px 0 0 8px}
+.split .n{background:var(--bar-alt);color:#10242A;border-radius:0 8px 8px 0}
+:root[data-theme="dark"] .split .y{color:#06242B}
+.finding{margin-top:16px;background:var(--tint);border-radius:12px;padding:14px 18px;color:var(--ink)}
+.finding b{color:var(--brand)}
+.photos{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px}
+.photos figure{margin:0}
+.photos img{width:100%;border-radius:12px;display:block}
+.photos figcaption{color:var(--muted);font-size:.9rem;margin-top:6px}
+
+/* quiz */
+.quiz{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;max-width:720px}
+.qbar{height:6px;background:var(--tint);border-radius:99px;margin-bottom:18px;overflow:hidden}
+.qbar i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.opts{display:grid;gap:10px;margin-top:16px}
+.opt{text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.opt:hover{border-color:var(--brand);background:var(--tint)}
+.res .tag{font-size:.9rem;padding:4px 12px}
+.btn{background:var(--brand);color:var(--brand-ink);border:0;border-radius:10px;padding:10px 18px;font-weight:700}
+.btn.ghost{background:none;color:var(--brand);border:1px solid var(--brand)}
+
+/* faq */
+details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 18px;margin-bottom:10px}
+summary{cursor:pointer;font-weight:700;padding:14px 0;list-style:none;display:flex;justify-content:space-between;gap:12px}
+summary::after{content:'+';color:var(--brand);font-size:1.3rem;line-height:1}
+details[open] summary::after{content:'−'}
+details p{padding-bottom:16px;color:var(--muted)}
+
+footer{margin-top:72px;margin-inline:-16px;padding:36px 16px 48px;background:var(--hero);color:var(--hero-muted);font-size:.95rem}
+footer b{color:var(--hero-ink)}
+footer .wrap{display:grid;gap:10px}
+
+@media (max-width:760px){
+  .hero .wrap,.two,.charts,.photos{grid-template-columns:minmax(0,1fr)}
+  .heroside{grid-template-columns:1fr}
+  section{padding-block:48px 4px}
+  .links{display:none}
+  .nav .wrap{justify-content:space-between}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.qbar i{transition:none}}
+
+</style>
+</head>
+<body>
+<nav class="nav" aria-label="Main">
+  <div class="wrap">
+    <a class="logo" href="#top">Career<b>Path</b></a>
+    <div class="links">
+      <a href="#paths">After 10th / 12th</a><a href="#careers">Careers</a><a href="#admission">Admission</a><a href="#exams">Exams</a><a href="#scholarships">Scholarships</a><a href="#skills">Skills</a><a href="#survey">Survey</a><a href="#quiz">Quiz</a><a href="#faq">FAQ</a>
+    </div>
+    <button class="theme" id="themeBtn" aria-label="Switch light or dark theme">◐</button>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <div class="mr">तुमचं करिअर, तुमची निवड</div>
+      <h1>Choose your career with everything in one place.</h1>
+      <p class="lead">Courses after 10th and 12th, entrance exams, admission steps, scholarships and skills to learn. Built from what 37 students told us they need.</p>
+      <form class="search" id="searchForm" role="search">
+        <label class="sr" for="q">Search CareerPath</label>
+        <input id="q" type="search" placeholder="Try: NEET, scholarship, diploma, resume" autocomplete="off">
+        <button type="submit">Search</button>
+      </form>
+      <div id="results" aria-live="polite"></div>
+      <div class="chips"><a href="#paths">After 10th</a><a href="#paths" data-go="12">After 12th</a><a href="#scholarships">Scholarships</a><a href="#exams">Entrance exams</a><a href="#quiz">Find my interest</a></div>
+    </div>
+    <div class="heroside">
+      <div class="stat"><b>67.6%</b><span>of surveyed students want regular career guidance</span></div>
+      <div class="stat"><b>35.1%</b><span>did not know about scholarship opportunities</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section id="paths">
+  <div class="head"><div class="kicker">Start here</div><h2>What can I do after 10th or 12th?</h2><p class="sub">Pick where you are now. Each route shows where it leads.</p></div>
+  <div class="tabs" role="group" aria-label="Choose level">
+    <button class="tab" data-lvl="10" aria-pressed="true">After 10th</button>
+    <button class="tab" data-lvl="12" aria-pressed="false">After 12th</button>
+  </div>
+  <div class="grid" id="pathGrid"></div>
+</section>
+
+<section id="careers">
+  <div class="head"><div class="kicker">Career fields</div><h2>Explore careers</h2><p class="sub">What each field is, what you need to study, and which exam opens the door.</p></div>
+  <div class="filter" id="careerFilter" role="group" aria-label="Filter careers by what you studied"></div>
+  <div class="grid" id="careerGrid"></div>
+</section>
+
+<section id="admission">
+  <div class="head"><div class="kicker">Admission</div><h2>How admission works, step by step</h2><p class="sub">The steps below follow the Maharashtra Centralised Admission Process (CAP) used for most professional courses. Dates change every year, so always read the official notice.</p></div>
+  <ol class="steps" id="stepList"></ol>
+  <div class="two">
+    <div class="card"><h3>Documents checklist</h3><p>Tick what you already have. Your ticks stay on this device.</p><ul class="check" id="docList"></ul><div class="prog" id="docProg"></div></div>
+    <div class="card"><h3>Tips that save a seat</h3>
+      <ul style="margin:12px 0 0;padding-left:20px;color:var(--ink);display:grid;gap:8px">
+        <li>Make copies and scans of every document before the registration window opens.</li>
+        <li>Fill the option form with 10 or more colleges and courses in your real order of preference.</li>
+        <li>Note last dates for registration, verification, option form and fee payment.</li>
+        <li>Keep your phone number and email on the portal correct. All alerts go there.</li>
+        <li>Ask a teacher or senior to check your form before you submit.</li>
+      </ul></div>
+  </div>
+</section>
+
+<section id="exams">
+  <div class="head"><div class="kicker">Entrance exams</div><h2>Which exam is for which course?</h2><p class="sub">Typical timing is shown. Exact dates, syllabus and fees are announced each year on the official site.</p></div>
+  <div class="tw"><table><thead><tr><th>Exam</th><th>Opens the door to</th><th>Conducted by</th><th>Usually held</th><th>Official site</th></tr></thead><tbody id="examBody"></tbody></table></div>
+  <p class="note">Tip: choose two or three exams that match your stream and prepare for those, instead of trying all of them.</p>
+</section>
+
+<section id="scholarships">
+  <div class="head"><div class="kicker">Money matters</div><h2>Scholarships and financial help</h2><p class="sub">In our survey 35.1% of students did not know about scholarships. Most are applied for online, once admission is confirmed.</p></div>
+  <div class="grid" id="schGrid"></div>
+  <p class="note">Eligibility, income limits and last dates change every year. Confirm them on the portal before you apply. Never pay anyone to apply for you.</p>
+</section>
+
+<section id="skills">
+  <div class="head"><div class="kicker">Skills</div><h2>Skills worth learning now</h2><p class="sub">Ordered by how many surveyed students wanted to learn each one. The bar shows that share.</p></div>
+  <div class="grid" id="skillGrid"></div>
+  <div class="two">
+    <div class="card"><h3>Resume checklist</h3><ul style="margin:12px 0 0;padding-left:20px;display:grid;gap:6px"><li>One page, clean font, no photo needed for freshers.</li><li>Name, phone, professional email, city.</li><li>Education with year and percentage or CGPA.</li><li>Projects: what you built and what you learned.</li><li>Skills, certificates and achievements.</li><li>Save as PDF named YourName_Resume.pdf.</li></ul></div>
+    <div class="card"><h3>Common interview questions</h3><ul style="margin:12px 0 0;padding-left:20px;display:grid;gap:6px"><li>Tell me about yourself.</li><li>Why did you choose this course or field?</li><li>What are your strengths and one thing you are improving?</li><li>Describe a project or problem you solved.</li><li>Where do you see yourself in five years?</li><li>Do you have any questions for us?</li></ul></div>
+  </div>
+</section>
+
+<section id="survey">
+  <div class="head"><div class="kicker">Our survey</div><h2>What students told us</h2><p class="sub">37 responses collected with Google Forms and analysed in Google Sheets. These results decided what is on this website.</p></div>
+  <div class="charts">
+    <div class="chart"><h3>Would you like regular career guidance sessions?</h3>
+      <div class="split" role="img" aria-label="Yes 67.6 percent, 25 students. No 32.4 percent, 12 students."><div class="y" style="flex:25">Yes 67.6%</div><div class="n" style="flex:12">No 32.4%</div></div>
+      <small style="color:var(--muted)">Yes: 25 students. No: 12 students.</small></div>
+    <div class="chart"><h3>Which career field interests you the most?</h3><div id="cField"></div></div>
+    <div class="chart"><h3>Which type of guidance do you need the most?</h3><div id="cGuide"></div></div>
+    <div class="chart"><h3>Which skills would you like to learn?</h3><div id="cSkill"></div></div>
+  </div>
+  <div class="finding"><b>Key finding:</b> students want career counselling, higher education information and practical skills. 62.2% say they know the admission process and 27% know it partly, but 35.1% are not aware of scholarships.</div>
+  <div class="photos">
+    <figure><img src="{{ url_for('static', filename='images/p1.jpg') }}" alt="CareerPath team members talking with school students in a campus courtyard" loading="lazy"><figcaption>Talking with school students about their career questions, 1 October 2026.</figcaption></figure>
+    <figure><img src="{{ url_for('static', filename='images/p2.jpg') }}" alt="School students listening to team members during the community interaction" loading="lazy"><figcaption>Students shared their interests and what guidance they need.</figcaption></figure>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="head"><div class="kicker">Find my interest</div><h2>Which fields suit me?</h2><p class="sub">Eight quick questions. This is a starting point for thinking, not a test. Nothing is saved or sent anywhere.</p></div>
+  <div class="quiz" id="quizBox"></div>
+</section>
+
+<section id="faq">
+  <div class="head"><div class="kicker">Questions</div><h2>Common questions</h2></div>
+  <div id="faqList"></div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div><b>CareerPath</b> · Community Engagement Project: Career Orientation of Youth</div>
+    <div>PDEA's College of Engineering, Manjari BK, Pune · Academic Year 2026–27</div>
+    <div>Team: Shraddha Biradar, Saurabh Kumbhar, Shubham Ghodke, Smit Yadav</div>
+    <div>This site is a guide, not an official notice. Dates, fees, cut-offs and eligibility change every year, so confirm them on the official website of the exam or scholarship before acting.</div>
+  </div>
+</footer>
+<script>
+/* CareerPath logic: all content is stored as data at the top, then drawn into the page. */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+/* ---------- data ---------- */
+const PATHS={
+ 10:[
+  {t:'Science (11th–12th)',tag:'PCM · PCB · PCMB',p:'Physics, Chemistry with Maths (PCM) or Biology (PCB). Keeps engineering, medical, pharmacy, architecture and science degrees open.',to:'Engineering, MBBS/BDS/AYUSH, B.Pharm, B.Sc, Defence (NDA)'},
+  {t:'Commerce (11th–12th)',tag:'Accounts · Economics',p:'Accountancy, business studies, economics. Good if you like numbers, business and money.',to:'B.Com, BBA, CA, CS, CMA, Banking, Economics'},
+  {t:'Arts / Humanities (11th–12th)',tag:'History · Political Science',p:'Languages, social sciences and creative subjects. Strong base for civil services and law.',to:'BA, Law, Journalism, Design, Teaching, UPSC/MPSC'},
+  {t:'Diploma (Polytechnic)',tag:'3 years after 10th',p:'Job-focused engineering and technology courses. After a diploma you can start working or join engineering in the second year (direct second year).',to:'Diploma jobs, Direct Second Year B.E./B.Tech'},
+  {t:'ITI (trade courses)',tag:'1–2 years',p:'Hands-on trades such as electrician, fitter, welder and COPA. Quickest route to skilled work or apprenticeships.',to:'Skilled jobs, apprenticeship, government technical posts'},
+  {t:'Other routes',tag:'Early career',p:'Agniveer (armed forces) after 10th or 12th as per notification, police and other recruitment, or vocational and skill programmes.',to:'Defence, police, skill-based jobs'}
+ ],
+ 12:[
+  {t:'12th Science (PCM)',tag:'Maths group',p:'Appear for MHT-CET and JEE Main for engineering. Also open: architecture, BCA/B.Sc computer science, NDA, defence technical entries.',to:'B.E./B.Tech, B.Arch, BCA, B.Sc, NDA'},
+  {t:'12th Science (PCB)',tag:'Biology group',p:'Appear for NEET-UG for medical courses. Also open: B.Pharm, agriculture, biotechnology, nursing, allied health.',to:'MBBS, BDS, BAMS, BHMS, B.Pharm, Agri, Nursing'},
+  {t:'12th Commerce',tag:'Business group',p:'Join B.Com, BBA or start CA/CS/CMA foundation alongside college. CUET opens many central universities.',to:'B.Com, BBA, CA, CS, CMA, Banking, Management'},
+  {t:'12th Arts / Humanities',tag:'Social science group',p:'Choose BA with a subject you can build on, law (CLAT or MH-CET Law), design or journalism. Start civil services reading early.',to:'BA, 5-year Law, B.Des, Journalism, UPSC/MPSC'},
+  {t:'Direct Second Year (after Diploma)',tag:'Lateral entry',p:'Diploma holders can join the second year of engineering through the DSE route of the Maharashtra CAP.',to:'B.E./B.Tech in 3 years'},
+  {t:'Skills and certificates',tag:'Any stream',p:'Add short courses in coding, AI tools, communication or accounting software while you study. It makes any degree stronger.',to:'Better internships and first jobs'}
+ ]
+};
+const FIELDS=[
+ {id:'eng',name:'Engineering',needs:'12th with Physics, Chemistry, Maths. Or a Diploma for direct second year.',exam:'MHT-CET, JEE Main, JEE Advanced (for IITs)',study:'Civil, Mechanical, Electrical, Electronics & Telecom, Computer, IT, AI & Data Science.',jobs:'Design, construction, manufacturing, software, government engineering services.',stream:['Science']},
+ {id:'med',name:'Medical and Health',needs:'12th with Physics, Chemistry, Biology.',exam:'NEET-UG',study:'MBBS, BDS, BAMS, BHMS, B.Pharm, Physiotherapy, Nursing and allied health.',jobs:'Doctor, dentist, pharmacist, therapist, hospital and public health roles.',stream:['Science']},
+ {id:'gov',name:'Government Jobs',needs:'10th, 12th or graduation depending on the post.',exam:'MPSC, UPSC, SSC, Railways (RRB), Banking (IBPS/SBI), Police recruitment',study:'Any degree for most posts. Start with general studies, maths and reasoning.',jobs:'Officer, clerk, inspector, bank and railway posts at state and central level.',stream:['Science','Commerce','Arts']},
+ {id:'com',name:'Commerce and Finance',needs:'12th Commerce preferred. Other streams can join many programmes.',exam:'CUET, MAH-BBA/BCA CET, CA Foundation',study:'B.Com, BBA, CA, CS, CMA, Banking and Finance, Economics.',jobs:'Accountant, auditor, analyst, banker, entrepreneur, company secretary.',stream:['Commerce']},
+ {id:'it',name:'IT and AI',needs:'12th Science with Maths helps. BCA and B.Sc CS also accept other streams.',exam:'MHT-CET, JEE Main, MAH-BCA CET, CUET',study:'B.E./B.Tech Computer or AI, BCA, B.Sc Computer Science, data science.',jobs:'Software developer, data analyst, AI engineer, cyber security, web designer.',stream:['Science','Commerce']},
+ {id:'law',name:'Law',needs:'12th in any stream for 5-year integrated law.',exam:'CLAT, MH-CET Law (5 years)',study:'BA LLB, B.Com LLB, BBA LLB. Or graduate first, then 3-year LLB.',jobs:'Lawyer, judge (judiciary exams), legal advisor, corporate counsel.',stream:['Arts','Commerce','Science']},
+ {id:'des',name:'Design and Architecture',needs:'12th with Maths for B.Arch. Any stream for most design courses.',exam:'NATA, JEE Main Paper 2, UCEED, NID DAT',study:'B.Arch, B.Des (product, graphic, UX), fashion, animation.',jobs:'Architect, product or UX designer, animator, interior designer.',stream:['Science','Arts']},
+ {id:'def',name:'Defence Services',needs:'12th (Science for Air Force and Navy in NDA). Medical and age limits apply.',exam:'NDA & NA (UPSC), Agniveer recruitment, CDS after graduation',study:'Fitness, general knowledge, maths, English, SSB interview preparation.',jobs:'Officer or soldier in Army, Navy, Air Force.',stream:['Science','Commerce','Arts']}
+];
+const STEPS=[
+ ['Choose course and exam','Match your stream with a course, then note which entrance exam it needs.'],
+ ['Register and apply','Fill the exam form on the official site before the last date.'],
+ ['Appear and check result','Take the exam, download the scorecard and keep it safe.'],
+ ['Register for CAP','Create your account on the admission portal and upload documents.'],
+ ['Document verification','Visit a facilitation centre or verify online as instructed.'],
+ ['Merit list','Check that your name, category and marks are correct. Raise any error quickly.'],
+ ['Fill the option form','List colleges and branches in your order of preference.'],
+ ['Seat allotment','Check your allotment. Accept it, or float or freeze as the round allows.'],
+ ['Pay fee and report','Pay the fee, collect the receipt and report to the college by the date given.']
+];
+const DOCS=['10th and 12th marksheets','School leaving certificate','Aadhaar card','Domicile / nationality certificate','Caste certificate and validity (if applicable)','Non-creamy layer certificate (if applicable)','Income certificate (for fee concession)','Entrance exam scorecard','Passport size photographs','Bank account linked with Aadhaar'];
+const EXAMS=[
+ ['MHT-CET','Engineering, pharmacy, agriculture in Maharashtra','Maharashtra State CET Cell','April to May','cetcell.mahacet.org'],
+ ['JEE Main','NITs, IIITs and other engineering colleges; B.Arch (Paper 2)','NTA','January and April','jeemain.nta.nic.in'],
+ ['JEE Advanced','IITs','IIT (rotating organiser)','May to June','jeeadv.ac.in'],
+ ['NEET-UG','MBBS, BDS, AYUSH and other medical courses','NTA','May','neet.nta.nic.in'],
+ ['CUET-UG','Central and many other universities (BA, B.Com, B.Sc)','NTA','May to June','cuet.nta.nic.in'],
+ ['NDA & NA','Army, Navy, Air Force officer training after 12th','UPSC','April and September','upsc.gov.in'],
+ ['CLAT','5-year integrated law at National Law Universities','Consortium of NLUs','December','consortiumofnlus.ac.in'],
+ ['NATA','B.Arch (architecture)','Council of Architecture','April to July','nata.in'],
+ ['MPSC / UPSC / SSC','State and central government posts after graduation','MPSC, UPSC, SSC','See yearly calendar','mpsc.gov.in · upsc.gov.in · ssc.gov.in']
+];
+const SCH=[
+ {t:'Post-Matric Scholarship (Maharashtra)',who:'Students of SC, ST, OBC, VJNT and SBC categories after 10th, in recognised courses.',how:'Apply on the MahaDBT portal after admission. Income and category rules apply.',site:'mahadbt.maharashtra.gov.in'},
+ {t:'EBC fee concession',who:'Students from families under the income limit who are not covered by other category schemes, mainly in professional courses.',how:'Apply on the MahaDBT portal. Keep the income certificate ready.',site:'mahadbt.maharashtra.gov.in'},
+ {t:'National Scholarship Portal (NSP)',who:'One portal for many central schemes, such as minority scholarships and Central Sector scholarships for college students.',how:'Register once, then pick schemes you qualify for. Verify through your institute.',site:'scholarships.gov.in'},
+ {t:'AICTE Pragati and Saksham',who:'Pragati: girl students in AICTE-approved degree or diploma courses. Saksham: students with disability in the same courses.',how:'Apply through the National Scholarship Portal during the open window.',site:'scholarships.gov.in'},
+ {t:'INSPIRE (DST)',who:'High scorers in 12th who take up natural or basic science degrees.',how:'Check the current notice for rank and marks limits, then apply online.',site:'online-inspire.gov.in'},
+ {t:'Education loan (Vidya Lakshmi)',who:'Any student admitted to a recognised course who needs a loan.',how:'Apply to several banks with one form on the portal. Compare interest and repayment terms.',site:'vidyalakshmi.co.in'}
+];
+const SKILLS=[
+ {n:'Communication Skills',pct:67.6,tips:['Speak for one minute daily on any topic, in front of a mirror.','Listen fully before you answer.','Write a short email to a friend as if to a company.']},
+ {n:'AI Tools',pct:56.8,tips:['Use an AI assistant to explain topics you find hard, then check with your textbook.','Learn to write clear prompts: goal, context, format.','Never copy answers blindly. Understand and verify them.']},
+ {n:'Interview Skills',pct:51.4,tips:['Practise the common questions out loud with a friend.','Prepare a 30-second introduction about yourself.','Research the college or company before you go.']},
+ {n:'Coding',pct:37.8,tips:['Start with Python or C. Solve one small problem a day.','Build a tiny project, such as a calculator or quiz.','Use free courses and keep your code on GitHub.']},
+ {n:'English Speaking',pct:35.1,tips:['Think in simple English sentences during the day.','Read one news article aloud daily.','Do not fear mistakes. Fluency comes from practice.']},
+ {n:'Resume Building',pct:27,tips:['Keep it to one page and update it every semester.','List projects and results, not only duties.','Ask a senior or teacher to review it.']}
+];
+const GUIDE=[['Career Counselling',54.1,20],['Higher Education Guidance',51.4,19],['Interview Skills',48.6,18],['Scholarship Information',43.2,16],['Government Exam Guidance',37.8,14],['Resume Building',16.2,6]];
+const FIELD_SURVEY=[['Engineering',62.2,23],['Medical',16.2,6],['Government Jobs',13.5,5],['Other (remaining)',8.1,3]];
+const SKILL_SURVEY=SKILLS.map(s=>[s.n,s.pct,Math.round(s.pct*37/100)]);
+const FAQ=[
+ ['I am not sure which stream to choose. What should I do?','Look at what you enjoy and do well in, then check which careers need which stream. Take the quiz on this page, talk to a teacher or a senior, and remember that Science keeps the most doors open, but Commerce and Arts lead to strong careers too.'],
+ ['Is engineering the only good option?','No. Engineering was the top choice in our survey (62.2%), but medical, government services, commerce, law, design and IT are all strong. Choose based on your interest and ability, not only popularity.'],
+ ['Can I take admission to engineering after a diploma?','Yes. Diploma holders can join the second year of B.E./B.Tech through the Direct Second Year route in the Maharashtra CAP.'],
+ ['Do I need coaching classes?','Not always. Many students succeed with school study, free online lessons and past question papers. Choose coaching only if you need structure and can afford it.'],
+ ['How do I find real scholarships and avoid fraud?','Use only official portals such as MahaDBT and the National Scholarship Portal. Genuine applications are free. Never share OTPs or pay an agent to apply.'],
+ ['What if I miss an admission date?','Keep checking the portal. Many processes have later rounds or spot rounds, but seats are fewer. Set reminders for every date so you do not miss one.'],
+ ['Where can I get counselling?','Start with your school or college counsellor and teachers. CareerPath also runs from a community project, so ask our team during student interaction sessions.']
+];
+const Q=[
+ ['Which activity sounds most fun?',[['Building or fixing a machine','eng'],['Helping someone feel better','med'],['Running a small business','com'],['Making an app or game','it']]],
+ ['Which school subject do you enjoy most?',[['Maths and Physics','eng'],['Biology','med'],['History and Civics','gov'],['Economics or Accounts','com']]],
+ ['How do you like to solve problems?',[['Step by step with logic','it'],['By talking and persuading','law'],['By drawing and imagining','des'],['By following a clear plan or discipline','def']]],
+ ['Which job picture feels best?',[['Wearing a uniform and serving the country','def'],['Working in a hospital','med'],['Leading a team in an office','gov'],['Designing a new product','des']]],
+ ['What do you read or watch most?',[['Tech and gadget news','it'],['Court cases and debates','law'],['Business and money news','com'],['Current affairs and politics','gov']]],
+ ['Pick a school project you would choose',[['Build a working model','eng'],['Survey the neighbourhood health','med'],['Create a poster or logo','des'],['Debate on a social issue','law']]],
+ ['How do you feel about physical fitness and discipline?',[['I love it','def'],['It is fine','eng'],['I prefer desk work','it'],['I prefer working with people','med']]],
+ ['What matters most in a career?',[['Stable government job','gov'],['Helping people directly','med'],['Creating something new','eng'],['Earning through my own skills','com']]]
+];
+
+/* ---------- renderers ---------- */
+function renderPaths(l){
+  $('#pathGrid').innerHTML=PATHS[l].map(x=>`<article class="card path"><span class="tag">${esc(x.tag)}</span><h3>${esc(x.t)}</h3><p>${esc(x.p)}</p><dl><div><dt>Leads to</dt><dd>${esc(x.to)}</dd></div></dl></article>`).join('');
+  $$('.tab').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lvl===String(l))));
+}
+$$('.tab').forEach(b=>b.addEventListener('click',()=>renderPaths(b.dataset.lvl)));
+$('.chips [data-go]').addEventListener('click',()=>renderPaths(12));
+renderPaths(10);
+
+let streamSel='All';
+function renderCareers(pick){
+  $('#careerFilter').innerHTML=['All','Science','Commerce','Arts'].map(s=>`<button class="tab" data-s="${s}" aria-pressed="${s===streamSel}">${s==='All'?'All fields':'Studied '+s}</button>`).join('');
+  $$('#careerFilter .tab').forEach(b=>b.addEventListener('click',()=>{streamSel=b.dataset.s;renderCareers()}));
+  $('#careerGrid').innerHTML=FIELDS.filter(f=>streamSel==='All'||f.stream.includes(streamSel)).map(f=>`<article class="card career${pick&&pick.includes(f.id)?' pick':''}" id="f-${f.id}"><h3>${esc(f.name)}</h3><div style="margin:6px 0 4px">${f.stream.map(s=>`<span class="tag">${s}</span>`).join('')}</div><dl><div><dt>You need</dt><dd>${esc(f.needs)}</dd></div><div><dt>Entrance / exam</dt><dd>${esc(f.exam)}</dd></div><div><dt>What you study</dt><dd>${esc(f.study)}</dd></div><div><dt>Jobs</dt><dd>${esc(f.jobs)}</dd></div></dl></article>`).join('');
+}
+renderCareers();
+
+$('#stepList').innerHTML=STEPS.map(s=>`<li><b>${esc(s[0])}</b><span>${esc(s[1])}</span></li>`).join('');
+let docs={};try{docs=JSON.parse(store.get('cp-docs')||'{}')}catch(e){}
+function renderDocs(){
+  $('#docList').innerHTML=DOCS.map((d,i)=>`<li><label><input type="checkbox" data-i="${i}"${docs[i]?' checked':''}><span>${esc(d)}</span></label></li>`).join('');
+  $$('#docList input').forEach(c=>c.addEventListener('change',()=>{docs[c.dataset.i]=c.checked;store.set('cp-docs',JSON.stringify(docs));prog()}));
+  prog();
+}
+function prog(){const n=DOCS.filter((_,i)=>docs[i]).length;$('#docProg').textContent=n+' of '+DOCS.length+' ready'}
+renderDocs();
+
+$('#examBody').innerHTML=EXAMS.map(e=>`<tr><td>${esc(e[0])}</td><td>${esc(e[1])}</td><td>${esc(e[2])}</td><td>${esc(e[3])}</td><td>${esc(e[4])}</td></tr>`).join('');
+$('#schGrid').innerHTML=SCH.map(s=>`<article class="card"><h3>${esc(s.t)}</h3><dl><div><dt>Who can apply</dt><dd>${esc(s.who)}</dd></div><div><dt>How</dt><dd>${esc(s.how)}</dd></div><div><dt>Official portal</dt><dd>${esc(s.site)}</dd></div></dl></article>`).join('');
+$('#skillGrid').innerHTML=SKILLS.map(s=>`<article class="card skill"><h3>${esc(s.n)}</h3><div class="meter" role="img" aria-label="${s.pct}% of students want this"><i style="width:${s.pct}%"></i></div><small>${s.pct}% of students want to learn this</small><ul>${s.tips.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></article>`).join('');
+
+function bars(el,data){
+  $(el).innerHTML=data.map(d=>`<div class="row" title="${esc(d[0])}: ${d[1]}% (${d[2]} students)"><div class="lab">${esc(d[0])}</div><div class="tr"><i style="width:${d[1]}%"></i></div><div class="v">${d[1]}%<br><small>${d[2]} of 37</small></div></div>`).join('');
+}
+bars('#cField',FIELD_SURVEY);bars('#cGuide',GUIDE);bars('#cSkill',SKILL_SURVEY);
+
+$('#faqList').innerHTML=FAQ.map(f=>`<details><summary>${esc(f[0])}</summary><p>${esc(f[1])}</p></details>`).join('');
+
+/* quiz */
+let qi=0,score={};
+function quiz(){
+  const box=$('#quizBox');
+  if(qi>=Q.length){
+    const top=Object.entries(score).sort((a,b)=>b[1]-a[1]).slice(0,2).map(e=>e[0]);
+    const names=top.map(id=>FIELDS.find(f=>f.id===id).name);
+    box.innerHTML=`<div class="res"><div class="kicker">Your result</div><h3 style="font-size:1.5rem;margin-bottom:10px">You may enjoy: ${names.map(esc).join(' and ')}</h3><p style="color:var(--muted);margin-bottom:16px">These matched your answers most often. Read about them below, talk to a teacher, and keep exploring other fields too.</p><button class="btn" id="seeBtn">Show these careers</button> <button class="btn ghost" id="again">Retake quiz</button></div>`;
+    $('#seeBtn').onclick=()=>{streamSel='All';renderCareers(top);location.hash='careers';const el=$('#f-'+top[0]);if(el)setTimeout(()=>el.scrollIntoView({block:'center'}),50)};
+    $('#again').onclick=()=>{qi=0;score={};quiz()};
+    return;
+  }
+  const q=Q[qi];
+  box.innerHTML=`<div class="qbar"><i style="width:${qi/Q.length*100}%"></i></div><div class="kicker">Question ${qi+1} of ${Q.length}</div><h3>${esc(q[0])}</h3><div class="opts">${q[1].map((o,i)=>`<button class="opt" data-i="${i}">${esc(o[0])}</button>`).join('')}</div>`;
+  $$('.opt',box).forEach(b=>b.onclick=()=>{const tag=q[1][b.dataset.i][1];score[tag]=(score[tag]||0)+1;qi++;quiz()});
+}
+quiz();
+
+/* search */
+const INDEX=[];
+Object.values(PATHS).forEach((arr,k)=>arr.forEach(x=>INDEX.push({t:x.t,s:'After '+(k?'12th':'10th'),b:x.p+' '+x.to,id:'paths'})));
+FIELDS.forEach(f=>INDEX.push({t:f.name,s:'Career field',b:[f.needs,f.exam,f.study,f.jobs].join(' '),id:'careers'}));
+EXAMS.forEach(e=>INDEX.push({t:e[0],s:'Entrance exam',b:e.join(' '),id:'exams'}));
+SCH.forEach(x=>INDEX.push({t:x.t,s:'Scholarship',b:x.who+' '+x.how,id:'scholarships'}));
+SKILLS.forEach(x=>INDEX.push({t:x.n,s:'Skill',b:x.tips.join(' '),id:'skills'}));
+STEPS.forEach(x=>INDEX.push({t:x[0],s:'Admission step',b:x[1],id:'admission'}));
+FAQ.forEach(x=>INDEX.push({t:x[0],s:'Question',b:x[1],id:'faq'}));
+function search(){
+  const q=$('#q').value.trim().toLowerCase(),r=$('#results');
+  if(!q){r.className='';r.innerHTML='';return}
+  const words=q.split(/\s+/);
+  const hits=INDEX.map(i=>{const hay=(i.t+' '+i.b).toLowerCase();let sc=0;words.forEach(w=>{if(i.t.toLowerCase().includes(w))sc+=3;else if(hay.includes(w))sc+=1;else sc-=100});return[i,sc]}).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  r.className='on';
+  r.innerHTML=hits.length?hits.map(([i])=>`<button data-id="${i.id}">${esc(i.t)}<small>${esc(i.s)}</small></button>`).join(''):'<div class="none">Nothing found. Try another word such as NEET, diploma or resume.</div>';
+  $$('button',r).forEach(b=>b.onclick=()=>{r.className='';location.hash=b.dataset.id;const el=document.getElementById(b.dataset.id);if(el)el.scrollIntoView()});
+}
+$('#q').addEventListener('input',search);
+$('#searchForm').addEventListener('submit',e=>{e.preventDefault();search()});
+
+/* theme */
+$('#themeBtn').onclick=()=>{
+  const cur=document.documentElement.dataset.theme||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+  const nx=cur==='dark'?'light':'dark';document.documentElement.dataset.theme=nx;store.set('cp-theme',nx);
+};
+const th=store.get('cp-theme');if(th)document.documentElement.dataset.theme=th;
+
+</script>
+</body>
+</html>
